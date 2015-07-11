@@ -83,10 +83,10 @@ class IMU(threading.Thread):
             self.data = d
         except IndexError:
             if self.debug:
-                print "RCIn: Couldn't read", self.num_inputs, "values"
+                print "IMU: Couldn't read all the values"
         except ValueError:
             if self.debug:
-                print "RCIn: Couldn't parse values into floats"
+                print "IMU: Couldn't parse values into floats"
 
 
 
