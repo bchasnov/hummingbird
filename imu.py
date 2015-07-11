@@ -10,15 +10,15 @@ class IMU(threading.Thread):
         # Port Setup
         self.port_name = port_name
 
-        self.port = serial.Serial(self.port_name, 115200, timeout=None)
-        self.port.write("$VNWRG,05,460800*XX\n")
-        self.port.close()
-        self.port = serial.Serial(self.port_name, 460800, timeout=None)
-        self.port.write("$VNWRG,06,8*XX\n")
-        self.port.write("$VNWRG,07,200*XX\n")
+        #self.port = serial.Serial(self.port_name, 115200, timeout=.5)
+        #self.port.write("$VNWRG,05,460800*XX\n")
+        #self.port.close()
+        self.port = serial.Serial(self.port_name, 460800, timeout=.5)
+        #self.port.write("$VNWRG,06,8*XX\n")
+        #self.port.write("$VNWRG,07,200*XX\n")
 
         # Status Flags
-        self.connected = False
+        self.connected = True
         self.stop = threading.Event()
 
         # IMU Data

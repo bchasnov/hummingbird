@@ -16,7 +16,7 @@ class RCIn(threading.Thread):
         # Port Setup
         self.port_name = port_name
         self.baud_rate = baud_rate
-        self.port = serial.Serial(self.port_name, self.baud_rate, timeout=None)
+        self.port = serial.Serial(self.port_name, self.baud_rate, timeout=.5)
 
         # Status Flags
         self.connected = False
