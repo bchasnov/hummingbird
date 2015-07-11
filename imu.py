@@ -1,6 +1,7 @@
 import serial
 import threading
 
+
 class IMU(threading.Thread):
     def __init__(self, port_name, debug=False):
         # Debug Output Switch
@@ -20,8 +21,7 @@ class IMU(threading.Thread):
         self.connected = False
         self.stop = threading.Event()
 
-        # RC Data
-        self.num_inputs = 8
+        # IMU Data
         self.data = None
 
         super(IMU, self).__init__()
@@ -37,6 +37,10 @@ class IMU(threading.Thread):
                 self.handleData(data)
 
     def halt(self):
+        """
+        Called from main loop upon shutdown, giving the thread a chance to cleanly exit
+        :return: None
+        """
         self.stop.set()
         self.port.close()
         self.join()
@@ -60,7 +64,7 @@ class IMU(threading.Thread):
             data[-1] = data[-1].split("*")[0]
             data = map(float, data)
             if len(data) != 13:
-              return
+                return
             d = {
                     "quat0": data[0],
                     "quat1": data[1],
@@ -84,13 +88,6 @@ class IMU(threading.Thread):
             if self.debug:
                 print "RCIn: Couldn't parse values into floats"
 
-    def shutdown(self):
-        """
-        Called from main loop upon shutdown, giving the thread a chance to cleanly exit
-        :return: None
-        """
-        self.stop = True
-        self.port.close()
 
 
 

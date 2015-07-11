@@ -7,35 +7,45 @@ __author__ = 'Apoorva Sharma'
 import serial
 import threading
 
+
 class RCIn(threading.Thread):
     def __init__(self, port_name, baud_rate, debug=False):
-        super(RCIn, self).__init__()
         # Debug Output Switch
         self.debug = debug
 
         # Port Setup
         self.port_name = port_name
         self.baud_rate = baud_rate
-        self.port = serial.Serial(self.port_name, self.baud_rate, timeout=0)
+        self.port = serial.Serial(self.port_name, self.baud_rate, timeout=None)
 
         # Status Flags
         self.connected = False
-        self.stop = False
+        self.stop = threading.Event()
 
         # RC Data
         self.num_inputs = 8
         self.data = [0.0]*self.num_inputs
+
+        super(RCIn, self).__init__()
 
     def run(self):
         """
         Override Thread.run(), called when self.start() is called
         :return: None
         """
-        while not self.stop:
+        while not self.stop.isSet():
             data = self.port.readline()
             if data:
                 self.handleData(data)
 
+    def halt(self):
+        """
+        Called from main loop upon shutdown, giving the thread a chance to cleanly exit
+        :return: None
+        """
+        self.stop.set()
+        self.port.close()
+        self.join()
 
     def handleData(self, data):
         """
@@ -53,14 +63,6 @@ class RCIn(threading.Thread):
         except ValueError:
             if self.debug:
                 print "RCIn: Couldn't parse values into floats"
-
-    def shutdown(self):
-        """
-        Called from main loop upon shutdown, giving the thread a chance to cleanly exit
-        :return: None
-        """
-        self.stop = True
-        self.port.close()
 
 
 
