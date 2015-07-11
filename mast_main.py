@@ -8,11 +8,12 @@ Ts = 1/100
 
 def setup():
     # initialize everything
+    rc_input.start()
 
     try:
         while True:
             loop()
-    except(KeyboardInterrupt):
+    except KeyboardInterrupt:
         shutdown()
 
 def shutdown():
