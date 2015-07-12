@@ -22,9 +22,15 @@ class RCIn(threading.Thread):
         self.connected = False
         self.stop = threading.Event()
 
+
         # RC Data
         self.num_inputs = 8
         self.data = [0.0]*self.num_inputs
+
+        # Calibration constants
+        self.scales = [1, 1, 1, 1, 1, 1, 1, 1]
+        self.offsets = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.switches = [4]
 
         super(RCIn, self).__init__()
 
@@ -56,7 +62,7 @@ class RCIn(threading.Thread):
         # Try getting self.num_inputs values as floats
         try:
             data_float = map(float, data.split(','))
-            self.data = data_float[1:self.num_inputs+1]
+            self.data = self.processData(data_float)
         except IndexError:
             if self.debug:
                 print "RCIn: Couldn't read", self.num_inputs, "values"
@@ -65,8 +71,19 @@ class RCIn(threading.Thread):
                 print "RCIn: Couldn't parse values into floats"
 
 
+    def processData(self, data_float):
+        """
+        Scales the analog data and clips the switches
+        :param data_float:
+        :return:
+        """
 
+        data = [0]*self.num_inputs
 
+        for i in range(self.num_inputs):
+            data[i] = (data_float[ i + 1]-self.offsets[i])*self.scales[i]
 
+        for key in self.switches:
+            data[key] = round(data[key])
 
-
+        return data
