@@ -1,5 +1,3 @@
-__author__ = 'Apoorva Sharma'
-
 # rcin.py
 # Basic class to receive RC input at a fixed sampling rate over a serial port
 # Interface for sensor input classes.
@@ -33,10 +31,10 @@ class RCIn(threading.Thread):
         Override Thread.run(), called when self.start() is called
         :return: None
         """
-        while not self.stop.isSet():
+        while not self.stop.is_set():
             data = self.port.readline()
             if data:
-                self.handleData(data)
+                self.handle_data(data)
 
     def halt(self):
         """
@@ -47,7 +45,7 @@ class RCIn(threading.Thread):
         self.port.close()
         self.join()
 
-    def handleData(self, data):
+    def handle_data(self, data):
         """
         Updates self.data with the latest values from the Serial Port.
         :param data: Bytes of one line read in from the Serial Port
