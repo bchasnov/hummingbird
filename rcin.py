@@ -28,8 +28,8 @@ class RCIn(threading.Thread):
         self.data = [0.0]*self.num_inputs
 
         # Calibration constants
-        self.scales = [1, 1, 1, 1, 1, 1, 1, 1]
-        self.offsets = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.scales = [512, 512, 512, 512, 512, 512, 512, 512]
+        self.offsets = [1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500]
         self.switches = [4]
 
         super(RCIn, self).__init__()
@@ -81,7 +81,7 @@ class RCIn(threading.Thread):
         data = [0]*self.num_inputs
 
         for i in range(self.num_inputs):
-            data[i] = (data_float[ i + 1]-self.offsets[i])*self.scales[i]
+            data[i] = (data_float[ i + 1]-self.offsets[i])/self.scales[i]
 
         for key in self.switches:
             data[key] = round(data[key])
