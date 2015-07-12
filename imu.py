@@ -66,10 +66,7 @@ class IMU(threading.Thread):
             if len(data) != 13:
                 return
             d = {
-                    "quat0": data[0],
-                    "quat1": data[1],
-                    "quat2": data[2],
-                    "quat3": data[3],
+                    "quat": [data[0], data[1], data[2], data[3]],
                     "magx": data[4],
                     "magy": data[5],
                     "magx": data[6],
