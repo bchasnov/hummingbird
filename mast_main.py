@@ -3,7 +3,7 @@ import time
 
 rc_input = RCIn('COM22', 9600, debug=True)
 
-Ts = 1/100
+Ts = 1./100
 
 
 def setup():
@@ -18,7 +18,7 @@ def setup():
 
 def shutdown():
     print "Shutting down"
-    rc_input.shutdown()
+    rc_input.halt()
 
 
 def loop():
@@ -53,3 +53,5 @@ def loop():
     while(time.time()-tic < Ts):
         pass
 	
+if __name__ == '__main__':
+    setup()
