@@ -28,8 +28,8 @@ class RCIn(threading.Thread):
         self.data = [0.0]*self.num_inputs
 
         # Calibration constants
-        self.scales = [512, 512, 512, 512, 512, 512, 512, 512]
-        self.offsets = [1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500]
+        self.scales = [1024, 512, 512, 512, 512, 1024, 512, 512]
+        self.offsets = [990, 1500, 1500, 1500, 1500, 990, 1500, 1500, 1500]
         self.switches = [4]
 
         super(RCIn, self).__init__()
