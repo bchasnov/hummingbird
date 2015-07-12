@@ -86,4 +86,7 @@ class RCIn(threading.Thread):
         for key in self.switches:
             data[key] = round(data[key])
 
+        saturate = lambda x: max(min(1.0,x),-1.0)
+        data = map(saturate, data)
+
         return data
