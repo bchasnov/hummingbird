@@ -1,3 +1,8 @@
+import numpy
+
+# epsilon for testing whether a number is close to zero
+_EPS = numpy.finfo(float).eps * 4.0
+
 # map axes strings to/from tuples of inner axis, parity, repetition, frame
 _AXES2TUPLE = {
     'sxyz': (0, 0, 0, 0), 'sxyx': (0, 0, 1, 0), 'sxzy': (0, 1, 0, 0),
@@ -9,9 +14,10 @@ _AXES2TUPLE = {
     'rzxy': (1, 1, 0, 1), 'ryxy': (1, 1, 1, 1), 'ryxz': (2, 0, 0, 1),
     'rzxz': (2, 0, 1, 1), 'rxyz': (2, 1, 0, 1), 'rzyz': (2, 1, 1, 1)}
 
+# axis sequences for Euler angles
+_NEXT_AXIS = [1, 2, 0, 1]
 
-
-
+_TUPLE2AXES = dict((v, k) for k, v in _AXES2TUPLE.items())
 
 def quaternion_multiply(quaternion1, quaternion0):
     """Return multiplication of two quaternions.
@@ -67,7 +73,120 @@ def quaternion_matrix(quaternion):
         [    q[1, 3]-q[2, 0],     q[2, 3]+q[1, 0], 1.0-q[1, 1]-q[2, 2], 0.0],
         [                0.0,                 0.0,                 0.0, 1.0]])
 
+def euler_from_matrix(matrix, axes='sxyz'):
+    """Return Euler angles from rotation matrix for specified axis sequence.
 
+    axes : One of 24 axis sequences as string or encoded tuple
+
+    Note that many Euler angle triplets can describe one matrix.
+
+    >>> R0 = euler_matrix(1, 2, 3, 'syxz')
+    >>> al, be, ga = euler_from_matrix(R0, 'syxz')
+    >>> R1 = euler_matrix(al, be, ga, 'syxz')
+    >>> numpy.allclose(R0, R1)
+    True
+    >>> angles = (4*math.pi) * (numpy.random.random(3) - 0.5)
+    >>> for axes in _AXES2TUPLE.keys():
+    ...    R0 = euler_matrix(axes=axes, *angles)
+    ...    R1 = euler_matrix(axes=axes, *euler_from_matrix(R0, axes))
+    ...    if not numpy.allclose(R0, R1): print(axes, "failed")
+
+    """
+    try:
+        firstaxis, parity, repetition, frame = _AXES2TUPLE[axes.lower()]
+    except (AttributeError, KeyError):
+        _TUPLE2AXES[axes]  # validation
+        firstaxis, parity, repetition, frame = axes
+
+    i = firstaxis
+    j = _NEXT_AXIS[i+parity]
+    k = _NEXT_AXIS[i-parity+1]
+
+    M = numpy.array(matrix, dtype=numpy.float64, copy=False)[:3, :3]
+    if repetition:
+        sy = math.sqrt(M[i, j]*M[i, j] + M[i, k]*M[i, k])
+        if sy > _EPS:
+            ax = math.atan2( M[i, j],  M[i, k])
+            ay = math.atan2( sy,       M[i, i])
+            az = math.atan2( M[j, i], -M[k, i])
+        else:
+            ax = math.atan2(-M[j, k],  M[j, j])
+            ay = math.atan2( sy,       M[i, i])
+            az = 0.0
+    else:
+        cy = math.sqrt(M[i, i]*M[i, i] + M[j, i]*M[j, i])
+        if cy > _EPS:
+            ax = math.atan2( M[k, j],  M[k, k])
+            ay = math.atan2(-M[k, i],  cy)
+            az = math.atan2( M[j, i],  M[i, i])
+        else:
+            ax = math.atan2(-M[j, k],  M[j, j])
+            ay = math.atan2(-M[k, i],  cy)
+            az = 0.0
+
+    if parity:
+        ax, ay, az = -ax, -ay, -az
+    if frame:
+        ax, az = az, ax
+    return ax, ay, az
+		
+
+def quaternion_from_euler(ai, aj, ak, axes='sxyz'):
+    """Return quaternion from Euler angles and axis sequence.
+
+    ai, aj, ak : Euler's roll, pitch and yaw angles
+    axes : One of 24 axis sequences as string or encoded tuple
+
+    >>> q = quaternion_from_euler(1, 2, 3, 'ryxz')
+    >>> numpy.allclose(q, [0.435953, 0.310622, -0.718287, 0.444435])
+    True
+
+    """
+    try:
+        firstaxis, parity, repetition, frame = _AXES2TUPLE[axes.lower()]
+    except (AttributeError, KeyError):
+        _TUPLE2AXES[axes]  # validation
+        firstaxis, parity, repetition, frame = axes
+
+    i = firstaxis + 1
+    j = _NEXT_AXIS[i+parity-1] + 1
+    k = _NEXT_AXIS[i-parity] + 1
+
+    if frame:
+        ai, ak = ak, ai
+    if parity:
+        aj = -aj
+
+    ai /= 2.0
+    aj /= 2.0
+    ak /= 2.0
+    ci = math.cos(ai)
+    si = math.sin(ai)
+    cj = math.cos(aj)
+    sj = math.sin(aj)
+    ck = math.cos(ak)
+    sk = math.sin(ak)
+    cc = ci*ck
+    cs = ci*sk
+    sc = si*ck
+    ss = si*sk
+
+    q = numpy.empty((4, ))
+    if repetition:
+        q[0] = cj*(cc - ss)
+        q[i] = cj*(cs + sc)
+        q[j] = sj*(cc + ss)
+        q[k] = sj*(cs - sc)
+    else:
+        q[0] = cj*cc + sj*ss
+        q[i] = cj*sc - sj*cs
+        q[j] = cj*ss + sj*cc
+        q[k] = cj*cs - sj*sc
+    if parity:
+        q[j] *= -1.0
+
+    return q
+	
 def euler_from_quaternion(quaternion, axes='sxyz'):
     """Return Euler angles from quaternion for specified axis sequence.
 
@@ -77,3 +196,5 @@ def euler_from_quaternion(quaternion, axes='sxyz'):
 
     """
     return euler_from_matrix(quaternion_matrix(quaternion), axes)
+
+	
