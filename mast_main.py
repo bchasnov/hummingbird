@@ -100,7 +100,7 @@ def computeOutputs(x):
     elif u > 1:
         u = 1
 
-    return u
+    return float(u)
 
 
 def loop(x):
@@ -114,14 +114,14 @@ def loop(x):
     print imu.data
 
     # compute outputs
-    q_ref = [1, 0, 0, 0]
+    q_ref = [1., 0., 0., 0.]
     x = updateState(x, q_ref, imu.data)
     throttle = computeOutputs(x)
 
 
     # perform failsafe
     if rc_input.data[5] == -1.0:
-        throttle = 0
+        throttle = 0.0
 
     # perform outputs
     servoboard.push()
