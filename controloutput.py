@@ -9,9 +9,9 @@ class ControlOutput:
         self.servoboard = servoboard  # reference to servoboard
         self.index = servo_i
 
-    def get(self, instance, owner):
+    def get(self):
         return self.servoboard.servo_vals[self.index]
 
-    def set(self, instance, value):
+    def set(self, value):
         print "Setting servo", self.index, "to", value
         self.servoboard.servo_vals[self.index] = value
