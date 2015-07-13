@@ -5,6 +5,9 @@ from servoboard import ServoBoard
 from controloutput import ControlOutput
 from quat import *
 
+#reference quaternion
+from qref import qref
+
 rc_input = RCIn('COM22', 9600, debug=True)
 imu = IMU("COM21", debug=True)
 
@@ -114,7 +117,8 @@ def loop(x):
     print imu.data
 
     # compute outputs
-    q_ref = [1., 0., 0., 0.]
+    global qref
+    q_ref = qref
     x = updateState(x, q_ref, imu.data)
     throttle = computeOutputs(x)
 
