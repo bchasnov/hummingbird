@@ -70,7 +70,10 @@ class ServoBoard:
                 if not self.stop.is_set():
                     if self.debug:
                         print "ServoBoard Watchdog: No value written for a while, resetting servos."
-                    self.port.write("sa " + " ".join(["0"]*self.num_servos))
+                    command = "sa " + " ".join(["0"]*self.num_servos)
+                    if self.debug:
+                        print "Sending command", command
+                    self.port.write(command)
             self.wrote_value.clear()
 
     def halt(self):
