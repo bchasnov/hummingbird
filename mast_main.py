@@ -3,7 +3,7 @@ import time
 from imu import IMU
 from servoboard import ServoBoard
 from controloutput import ControlOutput
-from transformations import *
+from quat import *
 
 rc_input = RCIn('COM22', 9600, debug=True)
 imu = IMU("COM21", debug=True)
@@ -12,34 +12,37 @@ servoboard = ServoBoard('ttyAMA0', 9600, 8, 0.5, debug=True)
 throttle = ControlOutput(servoboard, 0)
 
 
-class Gains:
+class Object:
     def __init__(self):
-        self.kp = 1
-        self.ki = 1
+        pass
 
-gains = Gains()
+gains = Object()
+gains.kp = 1
+gains.ki = 1
 
 Ts = 1./100
+
 
 class State:
     def __init__(self, imu_data):
         self.quaternion = imu_data['quat']
-        #self.theta = euler_from_quaternion(self.quaternion);
+        # self.theta = euler_from_quaternion(self.quaternion);
         self.IntThetaError = ErrorIntegrator(0) # TODO
 
     def update(self, x_ref, imu_data):
         pass
+
 
 class ErrorIntegrator:
     """ integrator without Anti-Windup"""
     global Ts
 
     def __init__(self, start_val):
-        self.value = start_val # the current value of the integrator
-        self.prev_error = start_val # the previous error measurement
+        self.value = start_val  # the current value of the integrator
+        self.prev_error = start_val  # the previous error measurement
 
     def update(self, error):
-        self.value += Ts*1.0/2*(error+self.prev_error) # trapezoidal integration
+        self.value += Ts*1.0/2*(error+self.prev_error)  # trapezoidal integration
         return self.value
 
 
@@ -51,7 +54,7 @@ def setup():
     while imu.data is None:
         pass
 
-    x = State(imu.data) # Quaternions, -> Theta, IntTheta
+    x = State(imu.data)  # Quaternions, -> Theta, IntTheta
 
     try:
         while True:
@@ -101,26 +104,26 @@ def computeOutputs(x):
 
 
 def loop(x):
-    global imu, rc_input
+    global imu, rc_input, throttle, servoboard
     tic = time.time()
-    #get RC inputs
+
+    # get RC inputs
     print rc_input.data
     
-    #get IMU
+    # get IMU
     print imu.data
 
-    #compute outputs
+    # compute outputs
     q_ref = [1, 0, 0, 0]
     x = updateState(x, q_ref, imu.data)
     throttle = computeOutputs(x)
 
 
-    #perform failsafe
+    # perform failsafe
     if rc_input.data[5] == -1.0:
         throttle = 0
 
-    #perform outputs
-
+    # perform outputs
     servoboard.push()
     toc = time.time()
 
@@ -130,7 +133,7 @@ def loop(x):
         print tictoc, "Frame took too long"
             
     #wait for next frame
-    while(time.time() - tic < Ts):
+    while (time.time() - tic) < Ts:
         pass
 
     return x
