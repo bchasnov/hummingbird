@@ -67,7 +67,7 @@ def shutdown():
     print "Shutting down"
     rc_input.halt()
     imu.halt()
-
+    servoboard.halt()
 
 def updateState(x, x_ref, imu_data):
     """

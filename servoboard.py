@@ -48,7 +48,9 @@ class ServoBoard:
 
         self.wrote_value.set()  # tell the watchdog a value has been written
 
-        command = "sa" + " ".join([str(int(1000*a)) for a in self.servo_vals]) + "\n"
+        command = "sa " + " ".join([str(int(1000*a)) for a in self.servo_vals]) + "\n"
+        if self.debug:
+            print "Sending command", command
         self.port.write(command)
 
     def init_esc(self):
@@ -63,6 +65,13 @@ class ServoBoard:
                     print "ServoBoard Watchdog: No value written for a while, resetting servos."
                 self.port.write("sa")
 
-
+    def halt(self):
+        self.stop.set()
+        self.port.close()
+        print "Waiting for watchdog thread to finish"
+        self.watchdog_thread.join()
+        print "Waiting for init_esc_thread to finish"
+        self.init_esc_thread.join()
+        print "Done"
 
 
