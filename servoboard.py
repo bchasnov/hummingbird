@@ -69,7 +69,8 @@ class ServoBoard:
             if not self.wrote_value.wait(self.watchdog_timeout):
                 if self.debug:
                     print "ServoBoard Watchdog: No value written for a while, resetting servos."
-                self.port.write("sa")
+                if not self.stop.is_set():
+                    self.port.write("sa")
             self.wrote_value.clear()
 
     def halt(self):
