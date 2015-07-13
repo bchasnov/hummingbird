@@ -6,11 +6,12 @@
 
 class ControlOutput:
     def __init__(self, servoboard, servo_i):
-        self.servoboard = servoboard
+        self.servoboard = servoboard  # reference to servoboard
         self.index = servo_i
 
     def __get__(self, instance, owner):
         return self.servoboard.servo_vals[self.index]
 
     def __set__(self, instance, value):
+        print "Setting servo", self.index, "to", value
         self.servoboard.servo_vals[self.index] = value

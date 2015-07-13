@@ -54,8 +54,14 @@ class ServoBoard:
         self.port.write(command)
 
     def init_esc(self):
+        if self.debug:
+            print "Allowing ESC to initialize by writing zeros to servos."
         self.port.write("sa")
+        if self.debug:
+            print "Waiting for ESC initialization...",
         time.sleep(self.esc_init_timeout)
+        if self.debug:
+            print "Done, servoboard is ready to use."
         self.esc_initialized.set()
 
     def watchdog(self):
@@ -68,10 +74,13 @@ class ServoBoard:
     def halt(self):
         self.stop.set()
         self.port.close()
-        print "Waiting for watchdog thread to finish"
+        if self.debug:
+            print "Waiting for watchdog thread to finish"
         self.watchdog_thread.join()
-        print "Waiting for init_esc_thread to finish"
+        if self.debug:
+            print "Waiting for init_esc_thread to finish"
         self.init_esc_thread.join()
-        print "Done"
+        if self.debug:
+            print "Done"
 
 
