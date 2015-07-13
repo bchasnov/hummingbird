@@ -8,7 +8,7 @@ from quat import *
 rc_input = RCIn('COM22', 9600, debug=True)
 imu = IMU("COM21", debug=True)
 
-servoboard = ServoBoard('ttyAMA0', 9600, 8, 0.5, debug=True)
+servoboard = ServoBoard('/dev/ttyAMA0', 9600, 8, 0.5, debug=True)
 throttle = ControlOutput(servoboard, 0)
 
 
